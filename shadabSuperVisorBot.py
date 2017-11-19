@@ -32,6 +32,7 @@ else:
     bot = telegram.Bot(token=supervisorToken)
     group = -1001137298648
 
+
 dispatcher = updater.dispatcher
 menuHandler = MenuHandler()
 goodNight = "CAADBAADbxcAAtR-mwVLHopnLOh30wI"
@@ -115,6 +116,11 @@ def all_message(bot  # type: telegram.Bot
     # print(str(cq.message))
     #
     # return
+    print(group)
+    print(update.message.chat_id)
+    if update.message.chat_id != group:
+        update.message.delete()
+        return
     if isSpam(bot, update) and not is_admin(update):
         update.message.delete()
         return
