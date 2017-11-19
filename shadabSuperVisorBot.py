@@ -4,7 +4,7 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "shadabsupervisor.settings")
 django.setup()
 ########################################################################
-DEBUG = True
+DEBUG = False
 from database.models import Member, Spam, AddLog, BotAdmin
 from menuHandler import MenuHandler
 from telegram.ext import Updater
