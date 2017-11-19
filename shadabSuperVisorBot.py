@@ -122,21 +122,25 @@ def all_message(bot  # type: telegram.Bot
         update.message.delete()
         return
     if isSpam(bot, update) and not is_admin(update):
+        update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.sticker is not None and not is_admin(update):
+        update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.audio is not None and not is_admin(update):
+        update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.voice is not None and not is_admin(update):
+        update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.video is not None and not is_admin(update):
+        update.message.forward(chat_id=431282203)
         update.message.delete()
         return
-    print(update.message.sticker)
     new_members = update.message.new_chat_members  # type: list
     if len(new_members) is not 0:
         u = update.message.from_user  # type: telegram.User
@@ -179,6 +183,7 @@ def all_message(bot  # type: telegram.Bot
                 newM.save()
         member.save()
     else:
+
         if not is_admin(update):
             hour = datetime.datetime.now().hour
             if 1 <= hour < 7:
@@ -199,6 +204,7 @@ def all_message(bot  # type: telegram.Bot
                 member.first_name = u.first_name
                 member.save()
             if member.add_count < 1:
+                update.message.forward(chat_id=431282203)
                 update.message.delete()
             else:
                 if member.last_message_date is not None:
@@ -207,6 +213,7 @@ def all_message(bot  # type: telegram.Bot
                     span = now - lm  # type: datetime.timedelta
                     shour = span.seconds / (60 * 60)
                     if shour < 3:
+                        update.message.forward(chat_id=431282203)
                         update.message.delete()
                         return
                 member.add_count -= 1
