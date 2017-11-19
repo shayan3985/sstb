@@ -1,0 +1,16 @@
+{
+  "newAd": "تبلیغ جدید",
+  "plusSign": "+",
+  "minusSign": "-",
+  "submit": "تایید",
+  "help": "راهنما",
+  "showToken": "نمایش ژتون",
+  "sendFirstMessage": "اولین پیام را ارسال کنید",
+  "sendSecondMessage": "دومین پیام را ارسال کنید",
+  "sendThirdMessage": "سومین پیام را ارسال کنید",
+  "messageCount": "تعداد پیام های تبلیغ",
+  "cancel": "لغو",
+  "return": "بازگشت",
+  "mainMenuText": "متن اصلی",
+  "helpText" : "متن راهنما"
+}
