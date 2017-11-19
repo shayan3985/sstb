@@ -10,7 +10,7 @@ from menuHandler import MenuHandler
 from telegram.ext import Updater
 import logging, telegram
 from telegram.ext import MessageHandler, Filters, CommandHandler, ConversationHandler, CallbackQueryHandler
-import datetime
+import datetime , base64
 from django.utils import timezone
 from button import Button, Method
 from telegram import InlineKeyboardMarkup, KeyboardButton, InlineKeyboardButton
@@ -150,19 +150,19 @@ def all_message(bot  # type: telegram.Bot
 
         if u.username is not None:
             response = '@' + u.username + '\n'
-            member.username = u.username
+            member.username = base64.b64encode(u.username.encode())
         if u.first_name is not None:
             response = response + u.first_name + ' '
-            member.first_name = u.first_name
+            member.first_name = base64.b64encode(u.first_name.encode())
         if u.last_name is not None:
             response = response + u.last_name
-            member.last_name = u.last_name
+            member.last_name = base64.b64encode(u.last_name.encode())
         response = response + '\n'
         response = response + 'added :\n'
         for m in new_members:  # type: telegram.User
             response = response + str(m.first_name) + '  ' + str(m.last_name) + '  @' + str(m.username) + '\n'
             log = AddLog.objects.create()
-            log.log = response
+            log.log = base64.b64encode(response.encode())
             log.save()
             newM = None
             try:
