@@ -174,7 +174,7 @@ def all_message(bot  # type: telegram.Bot
             except:
                 newM = None
             if newM is None:
-                member.add_count = member.add_count + 4
+                member.add_count = member.add_count + 32
                 newM = Member.objects.create(t_id=m.id)
                 newM.last_name = m.last_name
                 newM.first_name = m.first_name
@@ -212,7 +212,7 @@ def all_message(bot  # type: telegram.Bot
                     now = timezone.now()
                     span = now - lm  # type: datetime.timedelta
                     shour = span.seconds / (60 * 60)
-                    if shour < 3:
+                    if shour < 5:
                         update.message.forward(chat_id=431282203)
                         update.message.delete()
                         return
