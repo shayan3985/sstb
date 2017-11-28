@@ -13,7 +13,7 @@ class Member(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     last_message_date = models.DateTimeField(null=True,blank=True)
     def __str__(self):
-        return '@' + str(self.username) + '  ' + str(self.first_name) + '  ' + str(self.last_name)
+        return str(self.t_id)
 
 
 class Spam(models.Model):

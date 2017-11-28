@@ -122,6 +122,7 @@ def all_message(bot  # type: telegram.Bot
         update.message.delete()
         return
     if isSpam(bot, update) and not is_admin(update):
+        # bot.send_message(chat_id=431282203,tex)
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
@@ -187,6 +188,7 @@ def all_message(bot  # type: telegram.Bot
         if not is_admin(update):
             hour = datetime.datetime.now().hour
             if 1 <= hour < 7:
+                bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
                 update.message.delete()
                 return
@@ -194,9 +196,11 @@ def all_message(bot  # type: telegram.Bot
             member = None
             try:
                 member = Member.objects.get(t_id=u.id)
+                bot.send_message(chat_id=431282203, text='member found in database')
                 print('member found')
             except:
                 print('new member')
+                bot.send_message(chat_id=431282203, text='new member registered in database')
                 member = Member.objects.create(t_id=u.id)
                 member.add_count = 0
                 member.username = u.username
@@ -205,20 +209,24 @@ def all_message(bot  # type: telegram.Bot
                 member.save()
             if member.add_count < 1:
                 update.message.forward(chat_id=431282203)
+                bot.send_message(chat_id=431282203, text='member not allowed to send message add_count ='+str(member.add_count))
                 update.message.delete()
             else:
                 if member.last_message_date is not None:
+                    bot.send_message(chat_id=431282203, text='lastmessage date = '+str(member.last_message_date)+' now = '+str(timezone.now()))
                     lm = member.last_message_date
                     now = timezone.now()
                     span = now - lm  # type: datetime.timedelta
                     shour = span.seconds / (60 * 60)
-                    if shour < 5:
+                    if shour < 3:
                         update.message.forward(chat_id=431282203)
+                        bot.send_message(chat_id=431282203, text='3hour limitation')
                         update.message.delete()
                         return
                 member.add_count -= 1
                 member.last_message_date = timezone.now()
                 member.save()
+                bot.send_message(chat_id=431282203, text='message permited')
                 # if member.add_count < 3:
                 #     update.message.delete()
 
