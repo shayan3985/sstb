@@ -327,7 +327,7 @@ def status(bot , update):
     members = Member.objects.filter(add_count__gt=0)
     result = ''
     for member in members:
-        result =  result + '<a href="tg://user?id='+str(member.t_id)+'">'+'adsd'+'  </a><b>'+str(member.add_count)+'</b>\n'
+        result =  result + '<a href="tg://user?id='+str(member.t_id)+'">'+str(member.first_name)+'  </a><b>'+str(member.add_count)+'</b>\n'
     print(result)
     bot.send_message(chat_id=431282203,
                      text=result)
