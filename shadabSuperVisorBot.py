@@ -139,25 +139,25 @@ def all_message(bot  # type: telegram.Bot
         return
     if update.message.sticker is not None and not is_admin(update):
         if target_chat_id is not None:
-            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
+            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.audio is not None and not is_admin(update):
         if target_chat_id is not None:
-            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
+            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.voice is not None and not is_admin(update):
         if target_chat_id is not None:
-            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
+            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.video is not None and not is_admin(update):
         if target_chat_id is not None:
-            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
+            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
@@ -201,9 +201,10 @@ def all_message(bot  # type: telegram.Bot
                 newM.username = m.username
                 newM.add_count = 0
                 newM.save()
-        bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['you_may_post'] +
-                                                              str(member.add_count) + buttonManager.staticjson[
-                                                                  'you_may_post2'])
+        if target_chat_id is not None:
+            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['you_may_post'] +
+                                                          str(member.add_count) + buttonManager.staticjson[
+                                                              'you_may_post2'])
         member.save()
     else:
 
@@ -213,7 +214,7 @@ def all_message(bot  # type: telegram.Bot
                 bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
                 if target_chat_id is not None:
-                    bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['time_restriction'])
+                    bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['time_restriction'])
                 update.message.delete()
                 return
             u = update.message.from_user  # type: telegram.User
@@ -253,7 +254,8 @@ def all_message(bot  # type: telegram.Bot
                         update.message.forward(chat_id=431282203)
                         bot.send_message(chat_id=431282203, text='3hour limitation')
                         if target_chat_id is not None:
-                            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['time_span_restriction'])
+                            bot.send_message(chat_id=target_chat_id,
+                                             text=buttonManager.staticjson['time_span_restriction'])
                         update.message.delete()
                         return
                 member.add_count -= 1
@@ -273,7 +275,6 @@ def isSpam(bot
 def onStart(bot
             , update  # type: telegram.Update
             ):
-
     if update.message.chat.type != 'private':
         return
     m = None
@@ -281,7 +282,8 @@ def onStart(bot
     try:
         m = Member.objects.get(t_id=update.message.from_user.id)
         bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['you_may_post'] +
-                         str(m.add_count)+buttonManager.staticjson['you_may_post2'])
+                                                              str(m.add_count) + buttonManager.staticjson[
+                                                                  'you_may_post2'])
     except:
         m = None
         bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['error_not_in_group']
@@ -291,14 +293,15 @@ def onStart(bot
                                                                   'group_link'] + '">' +
                                                               buttonManager.staticjson['group_name'] + '</a>',
                          parse_mode='HTML')
-        m = Member.objects.create(t_id = update.message.from_user.id)
+        m = Member.objects.create(t_id=update.message.from_user.id)
         m.last_name = m.last_name
         m.first_name = m.first_name
         m.username = m.username
         m.add_count = 0
     m.chat_id = update.message.chat_id
     m.save()
-    bot.send_message(chat_id=431282203, text='<a href="tg://user?id=' + str(m.t_id) + '">'+m.first_name+'</a> used start command in bot',parse_mode='HTML')
+    bot.send_message(chat_id=431282203, text='<a href="tg://user?id=' + str(
+        m.t_id) + '">' + m.first_name + '</a> used start command in bot', parse_mode='HTML')
     # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
     #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
 
@@ -439,7 +442,6 @@ def goodnight():
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
     bot.send_sticker(chat_id=group, text=buttonManager.staticjson['message_me'])
-
 
 
 schedule.every().day.at("00:50").do(goodnight)
