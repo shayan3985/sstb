@@ -438,10 +438,12 @@ def goodmorning():
 def goodnight():
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
+    bot.send_sticker(chat_id=group, text=buttonManager.staticjson['message_me'])
 
 
-schedule.every().day.at("01:00").do(goodnight)
-schedule.every().day.at("07:00").do(goodmorning)
+
+schedule.every().day.at("00:50").do(goodnight)
+schedule.every().day.at("06:50").do(goodmorning)
 
 
 def ca(update):
