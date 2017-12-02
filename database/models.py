@@ -12,6 +12,7 @@ class Member(models.Model):
     last_name = models.CharField(max_length=255, null=True , blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
     last_message_date = models.DateTimeField(null=True,blank=True)
+    chat_id = models.BigIntegerField(blank=True,null=True ,  default=0)
     def __str__(self):
         return str(self.t_id)
 

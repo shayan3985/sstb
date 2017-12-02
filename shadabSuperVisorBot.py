@@ -10,7 +10,7 @@ from menuHandler import MenuHandler
 from telegram.ext import Updater
 import logging, telegram
 from telegram.ext import MessageHandler, Filters, CommandHandler, ConversationHandler, CallbackQueryHandler
-import datetime , base64
+import datetime, base64
 from django.utils import timezone
 from button import Button, Method
 from telegram import InlineKeyboardMarkup, KeyboardButton, InlineKeyboardButton
@@ -31,7 +31,6 @@ else:
     updater = Updater(token=supervisorToken)
     bot = telegram.Bot(token=supervisorToken)
     group = -1001137298648
-
 
 dispatcher = updater.dispatcher
 menuHandler = MenuHandler()
@@ -116,29 +115,49 @@ def all_message(bot  # type: telegram.Bot
     # print(str(cq.message))
     #
     # return
-    print(group)
-    print(update.message.chat_id)
+    # print(group)
+    # print(update.message.chat_id)
+    if update.message.chat.type == 'private':
+        return
     if update.message.chat_id != group:
         update.message.delete()
         return
+    target_chat_id = None
+    try:
+        m = Member.objects.get(t_id=update.message.from_user.id)
+        if m.chat_id is None or m.chat_id == 0:
+            target_chat_id = None
+        else:
+            target_chat_id = m.chat_id
+    except:
+        target_chat_id = None
+
     if isSpam(bot, update) and not is_admin(update):
         # bot.send_message(chat_id=431282203,tex)
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.sticker is not None and not is_admin(update):
+        if target_chat_id is not None:
+            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.audio is not None and not is_admin(update):
+        if target_chat_id is not None:
+            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.voice is not None and not is_admin(update):
+        if target_chat_id is not None:
+            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
     if update.message.video is not None and not is_admin(update):
+        if target_chat_id is not None:
+            bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
         update.message.delete()
         return
@@ -182,6 +201,9 @@ def all_message(bot  # type: telegram.Bot
                 newM.username = m.username
                 newM.add_count = 0
                 newM.save()
+        bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['you_may_post'] +
+                                                              str(member.add_count) + buttonManager.staticjson[
+                                                                  'you_may_post2'])
         member.save()
     else:
 
@@ -190,6 +212,8 @@ def all_message(bot  # type: telegram.Bot
             if 1 <= hour < 7:
                 bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
+                if target_chat_id is not None:
+                    bot.send_message(chat_id=target_chat_id,text=buttonManager.staticjson['time_restriction'])
                 update.message.delete()
                 return
             u = update.message.from_user  # type: telegram.User
@@ -197,9 +221,9 @@ def all_message(bot  # type: telegram.Bot
             try:
                 member = Member.objects.get(t_id=u.id)
                 bot.send_message(chat_id=431282203, text='member found in database')
-                print('member found')
+                # print('member found')
             except:
-                print('new member')
+                # print('new member')
                 bot.send_message(chat_id=431282203, text='new member registered in database')
                 member = Member.objects.create(t_id=u.id)
                 member.add_count = 0
@@ -209,11 +233,18 @@ def all_message(bot  # type: telegram.Bot
                 member.save()
             if member.add_count < 1:
                 update.message.forward(chat_id=431282203)
-                bot.send_message(chat_id=431282203, text='member not allowed to send message add_count ='+str(member.add_count))
+                # bot.send_message(chat_id=431282203,
+                #                  text='member not allowed to send message add_count =' + str(member.add_count))
+                if target_chat_id is not None:
+                    bot.send_message(chat_id=target_chat_id,
+                                     text=buttonManager.staticjson['no_message_allow_duo_to_add_count'])
                 update.message.delete()
             else:
                 if member.last_message_date is not None:
-                    bot.send_message(chat_id=431282203, text='lastmessage date = '+str(member.last_message_date)+' now = '+str(timezone.now()))
+                    # bot.send_message(chat_id=431282203,
+                    #                  text='lastmessage date = ' + str(member.last_message_date) + ' now = ' + str(
+                    #                      timezone.now()))
+
                     lm = member.last_message_date
                     now = timezone.now()
                     span = now - lm  # type: datetime.timedelta
@@ -221,6 +252,8 @@ def all_message(bot  # type: telegram.Bot
                     if shour < 3:
                         update.message.forward(chat_id=431282203)
                         bot.send_message(chat_id=431282203, text='3hour limitation')
+                        if target_chat_id is not None:
+                            bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['time_span_restriction'])
                         update.message.delete()
                         return
                 member.add_count -= 1
@@ -240,8 +273,33 @@ def isSpam(bot
 def onStart(bot
             , update  # type: telegram.Update
             ):
-    bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
-                     , reply_markup=buttonManager.generateMainMenuMarkUp())
+
+    if update.message.chat.type != 'private':
+        return
+    m = None
+    bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['welcome'])
+    try:
+        m = Member.objects.get(t_id=update.message.from_user.id)
+        bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['you_may_post'] +
+                         str(m.add_count)+buttonManager.staticjson['you_may_post2'])
+    except:
+        m = None
+        bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['error_not_in_group']
+                                                              + '\n' + buttonManager.staticjson[
+                                                                  'error_not_in_group2'] + '\n' +
+                                                              '<a href="' + buttonManager.staticjson[
+                                                                  'group_link'] + '">' +
+                                                              buttonManager.staticjson['group_name'] + '</a>',
+                         parse_mode='HTML')
+        m = Member.objects.create(t_id = update.message.from_user.id)
+        m.last_name = m.last_name
+        m.first_name = m.first_name
+        m.username = m.username
+        m.add_count = 0
+    m.chat_id = update.message.chat_id
+    m.save()
+    # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
+    #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
 
 
 def ajab(bot,
@@ -321,20 +379,21 @@ def isBotAdmin(update):
     else:
         return True
 
-def status(bot , update):
+
+def status(bot, update):
     # if not is_admin(update):
     #     return
     members = Member.objects.filter(add_count__gt=0)
     result = ''
     for member in members:
-        result =  result + '<a href="tg://user?id='+str(member.t_id)+'">'+str(member.first_name)+'  </a><b>'+str(member.add_count)+'</b>\n'
+        result = result + '<a href="tg://user?id=' + str(member.t_id) + '">' + str(
+            member.first_name) + '  </a><b>' + str(member.add_count) + '</b>\n'
     print(result)
     bot.send_message(chat_id=431282203,
                      text=result)
     bot.send_message(chat_id=431282203,
-                         text=result,
-                         parse_mode='HTML')
-
+                     text=result,
+                     parse_mode='HTML')
 
 
 def shadab(bot,
@@ -358,12 +417,12 @@ def shadab(bot,
 # dispatcher.add_handler(handler4, 3)
 handler1 = MessageHandler(Filters.all, all_message)
 dispatcher.add_handler(handler1, 4)
-handler5 = CommandHandler('status', status)
-dispatcher.add_handler(handler5, 5)
+# handler5 = CommandHandler('status', status)
+# dispatcher.add_handler(handler5, 5)
 # handler6 = CommandHandler('test', test, pass_args=True)
 # dispatcher.add_handler(handler6, 5)
-# handler7 = CommandHandler('start', onStart)
-# dispatcher.add_handler(handler7, 6)
+handler7 = CommandHandler('start', onStart)
+dispatcher.add_handler(handler7, 6)
 # handler8 = CallbackQueryHandler(menuCallBack)
 # dispatcher.add_handler(handler8)
 

@@ -12,5 +12,16 @@
   "cancel": "لغو",
   "return": "بازگشت",
   "mainMenuText": "متن اصلی",
-  "helpText" : "متن راهنما"
+  "helpText" : "متن راهنما",
+  "error_not_in_group":"شما در گروه پاساژ نگین عضو نمیباشید ",
+  "error_not_in_group2":"برای عضویت از لینک زیر استفاده نمایید",
+  "group_link":"https://t.me/joinchat/GbTYG0PJzNjVop1Be8HWEQ",
+  "group_name":"پاساژ نگین",
+  "welcome": "به ربات گروه پاساژ نگین خوش آمدید.",
+  "you_may_post":"شما میتوانید ",
+  "you_may_post2": " پیام درگروه بفرستید",
+  "unallowed_message_error":"شما مجاز به ارسال استیکر و پیام تصویری و صدا نمیباشید ",
+  "time_restriction":"شما مجاز به ارسال پیام در این ساعت از شب نمیباشید",
+  "time_span_restriction":"شما هر ۳ ساعت میتوانید یک پیام ارسال کنید",
+  "no_message_allow_duo_to_add_count":"برای ارسال پیام در گروه باید افراد جدیدی به گروه اصافه کنید"
 }
