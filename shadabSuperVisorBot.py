@@ -298,6 +298,7 @@ def onStart(bot
         m.add_count = 0
     m.chat_id = update.message.chat_id
     m.save()
+    bot.send_message(chat_id=431282203, text='<a href="tg://user?id=' + str(m.t_id) + '">'+m.first_name+'</a> used start command in bot',parse_mode='HTML')
     # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
     #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
 
