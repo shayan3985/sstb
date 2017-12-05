@@ -210,7 +210,7 @@ def all_message(bot  # type: telegram.Bot
 
         if not is_admin(update):
             hour = datetime.datetime.now().hour
-            if 1 <= hour < 7:
+            if 0 <= hour < 6:
                 bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
                 if target_chat_id is not None:
@@ -441,11 +441,11 @@ def goodmorning():
 def goodnight():
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
-    bot.send_sticker(chat_id=group, text=buttonManager.staticjson['message_me'])
+    bot.send_message(chat_id=group, text=buttonManager.staticjson['message_me'])
 
 
-schedule.every().day.at("00:50").do(goodnight)
-schedule.every().day.at("06:50").do(goodmorning)
+schedule.every().day.at("00:20").do(goodnight)
+schedule.every().day.at("06:20").do(goodmorning)
 
 
 def ca(update):
