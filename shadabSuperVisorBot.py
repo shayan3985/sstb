@@ -447,7 +447,7 @@ dispatcher.add_handler(handler1, 4)
 handler7 = CommandHandler('start', onStart)
 dispatcher.add_handler(handler7, 6)
 handler8 = CommandHandler('toggle', onToggle)
-dispatcher.add_handler(handler7, 7)
+dispatcher.add_handler(handler8, 7)
 # handler8 = CallbackQueryHandler(menuCallBack)
 # dispatcher.add_handler(handler8)
 
