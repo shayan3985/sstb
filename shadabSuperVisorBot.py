@@ -242,13 +242,13 @@ def all_message(bot  # type: telegram.Bot
             member = None
             try:
                 member = Member.objects.get(t_id=u.id)
-                bot.send_message(chat_id=431282203, text='member found in database')
-                bot.send_message(chat_id=hastiPV, text='member found in database')
+                # bot.send_message(chat_id=431282203, text='member found in database')
+                # bot.send_message(chat_id=hastiPV, text='member found in database')
                 # print('member found')
             except:
                 # print('new member')
-                bot.send_message(chat_id=431282203, text='new member registered in database')
-                bot.send_message(chat_id=hastiPV, text='new member registered in database')
+                # bot.send_message(chat_id=431282203, text='new member registered in database')
+                # bot.send_message(chat_id=hastiPV, text='new member registered in database')
                 member = Member.objects.create(t_id=u.id)
                 member.add_count = 0
                 member.username = u.username
@@ -258,8 +258,10 @@ def all_message(bot  # type: telegram.Bot
             if member.add_count < 1:
                 update.message.forward(chat_id=431282203)
                 update.message.forward(chat_id=hastiPV)
-                # bot.send_message(chat_id=431282203,
-                #                  text='member not allowed to send message add_count =' + str(member.add_count))
+                bot.send_message(chat_id=431282203,
+                                 text='member need to add someone to group')
+                bot.send_message(chat_id=hastiPV,
+                                 text='member need to add someone to group')
                 if target_chat_id is not None:
                     bot.send_message(chat_id=target_chat_id,
                                      text=buttonManager.staticjson['no_message_allow_duo_to_add_count'])
@@ -287,6 +289,8 @@ def all_message(bot  # type: telegram.Bot
                 member.add_count -= 1
                 member.last_message_date = timezone.now()
                 member.save()
+                update.message.forward(chat_id=431282203)
+                update.message.forward(chat_id=hastiPV)
                 bot.send_message(chat_id=431282203, text='message permited')
                 bot.send_message(chat_id=hastiPV, text='message permited')
                 # if member.add_count < 3:
@@ -497,6 +501,7 @@ def goodnight():
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
     bot.send_message(chat_id=group, text=buttonManager.staticjson['message_me'])
+    bot.send_message(chat_id=group, text=buttonManager.staticjson['night_time_rule'])
 
 
 schedule.every().day.at("00:20").do(goodnight)
