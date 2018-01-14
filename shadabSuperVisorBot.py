@@ -40,6 +40,7 @@ goodMorning = "CAADBAAD0gIAAmFcPgqGkUqd41QPhQI"
 ads = ""
 
 nightTime = False
+hastiPV = 107691775
 
 # u= telegram.Update()
 # m = telegram.Message()
@@ -77,6 +78,7 @@ def deleteBots(bot, update):
 def manage_voice(bot, update):
     if not is_admin(update):
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
 
 
@@ -92,18 +94,24 @@ def is_admin(update):
 def manage_audio(bot, update):
     if not is_admin(update):
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
 
 
 def manage_sticker(bot, update):
     # 431282203 maman
-    print(update.message.sticker.file_id)
     if not is_admin(update):
         bot.send_message(chat_id=431282203,
                          text=str('sticker from ' + str(update.message.from_user.first_name) + '\n' +
                                   ' ' + str(update.message.from_user.last_name) + '\n' + '@'
                                   + str(update.message.from_user.username)))
         update.message.forward(chat_id=431282203)
+
+        bot.send_message(chat_id=hastiPV,
+                         text=str('sticker from ' + str(update.message.from_user.first_name) + '\n' +
+                                  ' ' + str(update.message.from_user.last_name) + '\n' + '@'
+                                  + str(update.message.from_user.username)))
+        update.message.forward(chat_id=hastiPV)
 
         update.message.delete()
 
@@ -141,30 +149,35 @@ def all_message(bot  # type: telegram.Bot
     if isSpam(bot, update) and not is_admin(update):
         # bot.send_message(chat_id=431282203,tex)
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
         return
     if update.message.sticker is not None and not is_admin(update):
         if target_chat_id is not None:
             bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
         return
     if update.message.audio is not None and not is_admin(update):
         if target_chat_id is not None:
             bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
         return
     if update.message.voice is not None and not is_admin(update):
         if target_chat_id is not None:
             bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
         return
     if update.message.video is not None and not is_admin(update):
         if target_chat_id is not None:
             bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['unallowed_message_error'])
         update.message.forward(chat_id=431282203)
+        update.message.forward(chat_id=hastiPV)
         update.message.delete()
         return
     new_members = update.message.new_chat_members  # type: list
@@ -219,6 +232,8 @@ def all_message(bot  # type: telegram.Bot
             if nightTime:
                 bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
+                bot.send_message(chat_id=hastiPV, text='restricted time limit')
+                update.message.forward(chat_id=hastiPV)
                 if target_chat_id is not None:
                     bot.send_message(chat_id=target_chat_id, text=buttonManager.staticjson['time_restriction'])
                 update.message.delete()
@@ -228,10 +243,12 @@ def all_message(bot  # type: telegram.Bot
             try:
                 member = Member.objects.get(t_id=u.id)
                 bot.send_message(chat_id=431282203, text='member found in database')
+                bot.send_message(chat_id=hastiPV, text='member found in database')
                 # print('member found')
             except:
                 # print('new member')
                 bot.send_message(chat_id=431282203, text='new member registered in database')
+                bot.send_message(chat_id=hastiPV, text='new member registered in database')
                 member = Member.objects.create(t_id=u.id)
                 member.add_count = 0
                 member.username = u.username
@@ -240,6 +257,7 @@ def all_message(bot  # type: telegram.Bot
                 member.save()
             if member.add_count < 1:
                 update.message.forward(chat_id=431282203)
+                update.message.forward(chat_id=hastiPV)
                 # bot.send_message(chat_id=431282203,
                 #                  text='member not allowed to send message add_count =' + str(member.add_count))
                 if target_chat_id is not None:
@@ -259,6 +277,8 @@ def all_message(bot  # type: telegram.Bot
                     if shour < 3:
                         update.message.forward(chat_id=431282203)
                         bot.send_message(chat_id=431282203, text='3hour limitation')
+                        update.message.forward(chat_id=hastiPV)
+                        bot.send_message(chat_id=hastiPV, text='3hour limitation')
                         if target_chat_id is not None:
                             bot.send_message(chat_id=target_chat_id,
                                              text=buttonManager.staticjson['time_span_restriction'])
@@ -268,6 +288,7 @@ def all_message(bot  # type: telegram.Bot
                 member.last_message_date = timezone.now()
                 member.save()
                 bot.send_message(chat_id=431282203, text='message permited')
+                bot.send_message(chat_id=hastiPV, text='message permited')
                 # if member.add_count < 3:
                 #     update.message.delete()
 
@@ -308,6 +329,8 @@ def onStart(bot
     m.save()
     bot.send_message(chat_id=431282203, text='<a href="tg://user?id=' + str(
         m.t_id) + '">' + m.first_name + '</a> used start command in bot', parse_mode='HTML')
+    bot.send_message(chat_id=hastiPV, text='<a href="tg://user?id=' + str(
+        m.t_id) + '">' + m.first_name + '</a> used start command in bot', parse_mode='HTML')
     # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
     #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
 
@@ -319,9 +342,12 @@ def onToggle(bot,
          ):
     global nightTime
     m = update.message  # type: telegram.Message
-    if m.chat_id == 431282203:
+    if m.chat_id == 431282203 :
         nightTime = not nightTime
         bot.send_message(chat_id=431282203,text="night time --> " + str(nightTime))
+    if m.chat_id == 107691775:
+        nightTime = not nightTime
+        bot.send_message(chat_id=107691775, text="night time --> " + str(nightTime))
 
 
 
@@ -450,8 +476,8 @@ handler7 = CommandHandler('start', onStart)
 dispatcher.add_handler(handler7, 6)
 handler8 = CommandHandler('toggle', onToggle)
 dispatcher.add_handler(handler8, 7)
-handler9 = CommandHandler('chat_id', onChatIDRequest)
-dispatcher.add_handler(handler9, 8)
+# handler9 = CommandHandler('chat_id', onChatIDRequest)
+# dispatcher.add_handler(handler9, 8)
 # handler8 = CallbackQueryHandler(menuCallBack)
 # dispatcher.add_handler(handler8)
 
