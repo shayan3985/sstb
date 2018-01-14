@@ -456,11 +456,13 @@ import time, _thread
 
 
 def goodmorning():
+    global nightTime
     nightTime = False
     bot.send_sticker(chat_id=group, sticker=goodMorning)
 
 
 def goodnight():
+    global nightTime
     nightTime = True
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
