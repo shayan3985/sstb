@@ -311,7 +311,9 @@ def onStart(bot
     # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
     #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
 
+def onChatIDRequest(bot , update):
 
+    bot.send_message(chat_id=update.message.chat_id,text=str(update.message.chat_id))
 def onToggle(bot,
          update  # type: telegram.Update
          ):
@@ -448,6 +450,8 @@ handler7 = CommandHandler('start', onStart)
 dispatcher.add_handler(handler7, 6)
 handler8 = CommandHandler('toggle', onToggle)
 dispatcher.add_handler(handler8, 7)
+handler9 = CommandHandler('chat_id', onChatIDRequest)
+dispatcher.add_handler(handler9, 8)
 # handler8 = CallbackQueryHandler(menuCallBack)
 # dispatcher.add_handler(handler8)
 
