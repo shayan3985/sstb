@@ -39,6 +39,7 @@ noAds = "CAADBAADnRMAAmFcPgpEoUaR-0iBrwI"
 goodMorning = "CAADBAAD0gIAAmFcPgqGkUqd41QPhQI"
 ads = ""
 
+nightTime = False
 
 # u= telegram.Update()
 # m = telegram.Message()
@@ -110,6 +111,7 @@ def manage_sticker(bot, update):
 def all_message(bot  # type: telegram.Bot
                 , update  # type:telegram.Update
                 ):
+    global nightTime
     # cq = update.callback_query  # type: telegram.CallbackQuery
     # cq.answer()
     # print(str(cq.message))
@@ -117,6 +119,10 @@ def all_message(bot  # type: telegram.Bot
     # return
     # print(group)
     # print(update.message.chat_id)
+    # bot.send_message(chat_id=update.message.chat_id, text='<a href="tg://user?id=' + str(
+    #     update.message.from_user.id) + '">' + 'from_user' + '</a> ', parse_mode='HTML')
+    # bot.send_message(chat_id=update.message.chat_id, text='<a href="tg://user?id=' + str(
+    #     update.message.forward_from.id) + '">' + 'forward_from' + '</a> ', parse_mode='HTML')
     if update.message.chat.type == 'private':
         return
     if update.message.chat_id != group:
@@ -209,8 +215,8 @@ def all_message(bot  # type: telegram.Bot
     else:
 
         if not is_admin(update):
-            hour = datetime.datetime.now().hour
-            if 0 <= hour < 6:
+            #hour = datetime.datetime.now().hour
+            if nightTime:
                 bot.send_message(chat_id=431282203, text='restricted time limit')
                 update.message.forward(chat_id=431282203)
                 if target_chat_id is not None:
@@ -304,6 +310,19 @@ def onStart(bot
         m.t_id) + '">' + m.first_name + '</a> used start command in bot', parse_mode='HTML')
     # bot.send_message(chat_id=update.message.chat_id, text=buttonManager.staticjson['mainMenuText']
     #                  , reply_markup=buttonManager.generateMainMenuMarkUp())
+
+
+def onToggle(bot,
+         update  # type: telegram.Update
+         ):
+    global nightTime
+    m = update.message  # type: telegram.Message
+    if m.chat_id == 431282203:
+        nightTime = not nightTime
+        bot.send_message(chat_id=431282203,text="night time --> " + str(nightTime))
+
+
+
 
 
 def ajab(bot,
@@ -427,6 +446,8 @@ dispatcher.add_handler(handler1, 4)
 # dispatcher.add_handler(handler6, 5)
 handler7 = CommandHandler('start', onStart)
 dispatcher.add_handler(handler7, 6)
+handler8 = CommandHandler('toggle', onToggle)
+dispatcher.add_handler(handler7, 7)
 # handler8 = CallbackQueryHandler(menuCallBack)
 # dispatcher.add_handler(handler8)
 
@@ -435,10 +456,12 @@ import time, _thread
 
 
 def goodmorning():
+    nightTime = False
     bot.send_sticker(chat_id=group, sticker=goodMorning)
 
 
 def goodnight():
+    nightTime = True
     bot.send_sticker(chat_id=group, sticker=noAds)
     bot.send_sticker(chat_id=group, sticker=goodNight)
     bot.send_message(chat_id=group, text=buttonManager.staticjson['message_me'])
