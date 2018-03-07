@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Member , Spam , AddLog , BotAdmin
+from .models import Member, Spam, AddLog, BotAdmin, Governor, Post
+
+
 # Register your models here.
 
 class CustomerMember(admin.ModelAdmin):
@@ -41,7 +43,10 @@ class CustomerMember(admin.ModelAdmin):
     search_fields = ('t_id',)
     filter_horizontal = ()
 
-admin.site.register(Member,CustomerMember)
+
+admin.site.register(Member)#, CustomerMember)
 admin.site.register(Spam)
 admin.site.register(AddLog)
 admin.site.register(BotAdmin)
+admin.site.register(Governor)
+admin.site.register(Post)
