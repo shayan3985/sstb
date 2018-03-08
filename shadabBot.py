@@ -584,7 +584,7 @@ def threadjob():
         schedule.run_pending()
         time.sleep(60)
 
-
+_thread.start_new_thread(threadjob, ())
 updater.start_polling()
 
 
