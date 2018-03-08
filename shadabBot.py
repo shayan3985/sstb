@@ -570,7 +570,7 @@ def goodnight():
     global night_time
     night_time = True
     bot.send_sticker(chat_id=group, sticker=noAdsStickerID)
-    bot.send_sticker(chat_id=group, sticker=goodnight())
+    bot.send_sticker(chat_id=group, sticker=goodNightStickerID)
     # bot.send_message(chat_id=group, text=buttonManager.staticjson['message_me'])
     # bot.send_message(chat_id=group, text=buttonManager.staticjson['night_time_rule'])
 
