@@ -122,10 +122,16 @@ def group_text(bot  # type: telegram.Bot
         # bot.send_message(chat_id=log_channel,text="hihi",reply_to_message_id=forwarded_message.message_id)
         message.delete()
         return
-    if update.message.sticker is not None and not is_admin(update):
-        message.forward(chat_id=log_channel)
-        update.message.delete()
-        return
+    if not private_party and not party_time_check():
+        if update.message.sticker is not None and not is_admin(update):
+            message.forward(chat_id=log_channel)
+            update.message.delete()
+            return
+        if update.message.video is not None and not is_admin(update):
+            message.forward(chat_id=log_channel)
+            update.message.delete()
+            return
+
     if update.message.audio is not None and not is_admin(update):
         message.forward(chat_id=log_channel)
         update.message.delete()
@@ -134,10 +140,7 @@ def group_text(bot  # type: telegram.Bot
         message.forward(chat_id=log_channel)
         update.message.delete()
         return
-    if update.message.video is not None and not is_admin(update):
-        message.forward(chat_id=log_channel)
-        update.message.delete()
-        return
+
     new_members = update.message.new_chat_members  # type: list
     print(len(new_members))
     if len(new_members) is not 0:
@@ -167,8 +170,7 @@ def group_text_permission_control(bot  # type: telegram.Bot
     global private_party
     global private_party_owner
     # private party
-    print(type(private_party_owner))
-    print(type(update.message.from_user.id))
+
     if private_party:
         if party_time_check():
             if private_party_owner == str(update.message.from_user.id):
@@ -188,6 +190,12 @@ def group_text_permission_control(bot  # type: telegram.Bot
     except:
         member = Member.objects.create(t_id=user_id)
         member.add_count = 0
+        if update.message.from_user.username is not None:
+            update.message.from_user.username = base64.b64encode(update.message.from_user.username.encode())
+        if update.message.from_user.first_name is not None:
+            update.message.from_user.first_name = base64.b64encode(update.message.from_user.first_name.encode())
+        if update.message.from_user.last_name is not None:
+            update.message.from_user.last_name = base64.b64encode(update.message.from_user.last_name.encode())
         member.username = update.message.from_user.username
         member.last_name = update.message.from_user.last_name
         member.first_name = update.message.from_user.first_name
@@ -203,16 +211,20 @@ def group_text_permission_control(bot  # type: telegram.Bot
         m = update.message.forward(chat_id=log_channel)  # type: telegram.Message
         bot.send_message(chat_id=log_channel, text=messageHelper.json["3"].format(update.message.from_user.id,
                                                                                   update.message.from_user.first_name) + "/n" +
-                                                   messageHelper.json["22"], reply_to_message_id=m.message_id)
+                                                   messageHelper.json["22"], reply_to_message_id=m.message_id,parse_mode='HTML')
         update.message.delete()
         return
     post = Post.objects.filter(from_user_id=user_id).filter(datetime__gt=timezone.now() - timezone.timedelta(hours=3))
     if len(post) > 1:
+        print("here1")
         m = update.message.forward(chat_id=log_channel)
+        print("here2")
         bot.send_message(chat_id=log_channel, text=messageHelper.json["3"].format(update.message.from_user.id,
                                                                                   update.message.from_user.first_name) + "/n" +
-                                                   messageHelper.json["23"], reply_to_message_id=m.message_id)
+                                                   messageHelper.json["23"], reply_to_message_id=m.message_id,parse_mode='HTML')
+        print("here3")
         update.message.delete()
+        print("here4")
         return
 
     today_min = timezone.datetime.combine(timezone.now().date(), timezone.now().time().min) + timezone.timedelta(
@@ -274,11 +286,11 @@ def manage_new_members_update(bot, update, new_members):
             newM.save()
             channel_log(messageHelper.json["20"].format(messageHelper.json["3"]
                                                         .format(str(member.t_id),
-                                                                str(member.first_name))))
+                                                                base64.b64decode(member.first_name).decode())))
         else:
             channel_log(messageHelper.json["21"].format(messageHelper.json["3"]
                                                         .format(str(member.t_id),
-                                                                str(member.first_name))))
+                                                                base64.b64decode(member.first_name).decode())))
     member.save()
 
 
@@ -457,6 +469,9 @@ def cmd_party(bot  # type: telegram.Bot
             messageHelper.json["3"].format(update.message.from_user.id, update.message.from_user.first_name)))
         bot.send_message(chat_id=update.message.chat_id,
                          text=messageHelper.json["16"])
+        bot.send_message(chat_id=group, text=messageHelper.json["31"]
+                         .format(messageHelper.json["3"].format(user.t_id, base64.b64decode(user.first_name).decode()), str(duration * 60)),
+                         parse_mode='HTML')
         return
     elif cmd == "cancel":
         private_party = False
@@ -523,19 +538,22 @@ def cmd_inquiry(bot  # type: telegram.Bot
                          messageHelper.json["3"].format(id, m.first_name), m.add_count
                      ))
 
+
 def cmd_gm(bot  # type: telegram.Bot
-                   , update  # type: telegram.Update
-                   ):
+           , update  # type: telegram.Update
+           ):
     if not is_master(update.message.from_user.id):
         return
     goodmorning()
 
+
 def cmd_gn(bot  # type: telegram.Bot
-                   , update  # type: telegram.Update
-                   ):
+           , update  # type: telegram.Update
+           ):
     if not is_master(update.message.from_user.id):
         return
     goodnight()
+
 
 hdl = MessageHandler(Filters.all & (~Filters.command), all_text)
 updater.dispatcher.add_handler(hdl)
@@ -575,14 +593,15 @@ def goodnight():
     # bot.send_message(chat_id=group, text=buttonManager.staticjson['night_time_rule'])
 
 
-schedule.every().day.at("00:20").do(goodnight)
-schedule.every().day.at("06:20").do(goodmorning)
+schedule.every().day.at("23:30").do(goodnight)
+schedule.every().day.at("05:30").do(goodmorning)
 
 
 def threadjob():
     while True:
         schedule.run_pending()
         time.sleep(60)
+
 
 _thread.start_new_thread(threadjob, ())
 updater.start_polling()

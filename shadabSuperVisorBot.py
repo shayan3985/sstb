@@ -4,7 +4,7 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "shadabsupervisor.settings")
 django.setup()
 ########################################################################
-DEBUG = False
+DEBUG = True
 from database.models import Member, Spam, AddLog, BotAdmin
 from menuHandler import MenuHandler
 from telegram.ext import Updater
@@ -517,7 +517,21 @@ def threadjob():
     while True:
         schedule.run_pending()
         time.sleep(60)
+import socket ,json , sys
+message = {'id': 1, 'method': 'getblocktemplate', 'params': [{"capabilities": ["coinbasetxn", "workid", "coinbase/append"]}]}
 
+try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("1")
 
-_thread.start_new_thread(threadjob, ())
-updater.start_polling()
+    s.connect(("bch.viabtc.com", 3333))
+    print("2")
+    s.sendall((json.dumps(message)+"\n").encode())
+    print("3")
+    data = s.recv(4096)
+    s.close()
+except IOError:
+    print("blocknotify: Cannot connect to the pool")
+    sys.exit()
+# _thread.start_new_thread(threadjob, ())
+# updater.start_polling()
