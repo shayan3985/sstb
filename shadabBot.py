@@ -4,8 +4,7 @@ import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "shadabsupervisor.settings")
 django.setup()
 ########################################################################
-
-DEBUG = False
+DEBUG = True
 from database.models import Member, Spam, AddLog, BotAdmin, Governor, Post
 from telegram.ext import Updater
 import logging, telegram
@@ -30,7 +29,6 @@ goodMorningStickerID = "CAADBAAD0gIAAmFcPgqGkUqd41QPhQI"
 
 shayanTID = 389224229
 nasrinTID = 431282203
-
 night_time = False
 private_party = False
 private_party_duration = None
@@ -63,6 +61,8 @@ else:
     updater = Updater(token=supervisorToken)
     group = mainGroupID
 
+last_morning_call = None
+last_night_call = None
 
 def is_master(id):
     if id == shayanTID:
@@ -99,6 +99,10 @@ def is_spam(message  # type: telegram.Message
 def all_text(bot  # type: telegram.Bot
              , update  # type: telegram.Update
              ):
+    if update is None:
+        return
+    if update.message is None:
+        return
     if update.message.chat.type == telegram.Chat.PRIVATE:
         private_text(bot, update)
     elif update.message.chat.type == telegram.Chat.CHANNEL:
@@ -201,6 +205,9 @@ def group_text_permission_control(bot  # type: telegram.Bot
         member.first_name = update.message.from_user.first_name
         member.permitted_datetime = timezone.now()
         member.save()
+    if member.permitted_datetime is None:
+        member.permitted_datetime = timezone.now()
+        member.save()
     if timezone.now() < member.permitted_datetime:
         pass
     elif member.add_count > 0:
@@ -211,20 +218,18 @@ def group_text_permission_control(bot  # type: telegram.Bot
         m = update.message.forward(chat_id=log_channel)  # type: telegram.Message
         bot.send_message(chat_id=log_channel, text=messageHelper.json["3"].format(update.message.from_user.id,
                                                                                   update.message.from_user.first_name) + "/n" +
-                                                   messageHelper.json["22"], reply_to_message_id=m.message_id,parse_mode='HTML')
+                                                   messageHelper.json["22"], reply_to_message_id=m.message_id,
+                         parse_mode='HTML')
         update.message.delete()
         return
     post = Post.objects.filter(from_user_id=user_id).filter(datetime__gt=timezone.now() - timezone.timedelta(hours=3))
     if len(post) > 1:
-        print("here1")
         m = update.message.forward(chat_id=log_channel)
-        print("here2")
         bot.send_message(chat_id=log_channel, text=messageHelper.json["3"].format(update.message.from_user.id,
                                                                                   update.message.from_user.first_name) + "/n" +
-                                                   messageHelper.json["23"], reply_to_message_id=m.message_id,parse_mode='HTML')
-        print("here3")
+                                                   messageHelper.json["23"], reply_to_message_id=m.message_id,
+                         parse_mode='HTML')
         update.message.delete()
-        print("here4")
         return
 
     today_min = timezone.datetime.combine(timezone.now().date(), timezone.now().time().min) + timezone.timedelta(
@@ -470,7 +475,8 @@ def cmd_party(bot  # type: telegram.Bot
         bot.send_message(chat_id=update.message.chat_id,
                          text=messageHelper.json["16"])
         bot.send_message(chat_id=group, text=messageHelper.json["31"]
-                         .format(messageHelper.json["3"].format(user.t_id, base64.b64decode(user.first_name).decode()), str(duration * 60)),
+                         .format(messageHelper.json["3"].format(user.t_id, base64.b64decode(user.first_name).decode()),
+                                 str(duration * 60)),
                          parse_mode='HTML')
         return
     elif cmd == "cancel":
@@ -555,6 +561,24 @@ def cmd_gn(bot  # type: telegram.Bot
     goodnight()
 
 
+def cmd_debug(bot  # type: telegram.Bot
+              , update  # type: telegram.Update
+              ):
+    if not is_master(update.message.from_user.id):
+        return
+    global night_time
+    global DEBUG
+    global last_night_call
+    global last_morning_call
+    log = ""
+    log += "night_time = " + str(night_time) + "\n"
+    log += "debug = " + str(DEBUG) + "\n"
+    log += "last_night_call = " + str(last_night_call) + "\n"
+    log += "last_morning_call = " + str(last_morning_call) + "\n"
+
+    bot.send_message(chat_id=update.message.chat_id, text=log)
+
+
 hdl = MessageHandler(Filters.all & (~Filters.command), all_text)
 updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("governor", cmd_governor, pass_args=True)
@@ -573,19 +597,25 @@ hdl = CommandHandler("nighttime", cmd_night_time)
 updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("deleteallposts", delete_all_messages)
 updater.dispatcher.add_handler(hdl)
+hdl = CommandHandler("debug", cmd_debug)
+updater.dispatcher.add_handler(hdl)
 
 import schedule
 import time, _thread
 
 
 def goodmorning():
+    global last_morning_call
     global night_time
+    last_morning_call = datetime.datetime.now()
     night_time = False
     bot.send_sticker(chat_id=group, sticker=goodMorningStickerID)
 
 
 def goodnight():
+    global last_night_call
     global night_time
+    last_night_call = datetime.datetime.now()
     night_time = True
     bot.send_sticker(chat_id=group, sticker=noAdsStickerID)
     bot.send_sticker(chat_id=group, sticker=goodNightStickerID)
