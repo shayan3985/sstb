@@ -585,7 +585,7 @@ def cmd_debug(bot  # type: telegram.Bot
 
 def cmd_restart(bot  # type: telegram.Bot
                , update  # type: telegram.Update
-               , args):
+               ):
     if not is_master(update.message.from_user.id):
         return
     import os
