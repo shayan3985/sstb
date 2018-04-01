@@ -64,6 +64,7 @@ else:
 last_morning_call = None
 last_night_call = None
 
+
 def is_master(id):
     if id == shayanTID:
         return True
@@ -582,6 +583,15 @@ def cmd_debug(bot  # type: telegram.Bot
     bot.send_message(chat_id=update.message.chat_id, text=log)
 
 
+def cmd_restart(bot  # type: telegram.Bot
+               , update  # type: telegram.Update
+               , args):
+    if not is_master(update.message.from_user.id):
+        return
+    import os
+    os.system('reboot')
+
+
 hdl = MessageHandler(Filters.all & (~Filters.command), all_text)
 updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("governor", cmd_governor, pass_args=True)
@@ -601,6 +611,8 @@ updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("deleteallposts", delete_all_messages)
 updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("debug", cmd_debug)
+updater.dispatcher.add_handler(hdl)
+hdl = CommandHandler("restart", cmd_restart)
 updater.dispatcher.add_handler(hdl)
 
 import schedule
