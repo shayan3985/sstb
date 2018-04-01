@@ -117,7 +117,10 @@ def group_text(bot  # type: telegram.Bot
     global night_time
     message = update.message  # type: telegram.Message
     if message.chat_id != group:
-        message.delete()
+        try:
+            message.delete()
+        except:
+            pass
         return
     if is_admin(update) or is_governor(update.message.from_user.id):
         return
@@ -607,7 +610,7 @@ import time, _thread
 def goodmorning():
     global last_morning_call
     global night_time
-    last_morning_call = datetime.datetime.now()
+    last_morning_call = datetime.datetime.now() + datetime.timedelta(minutes=30)
     night_time = False
     bot.send_sticker(chat_id=group, sticker=goodMorningStickerID)
 
@@ -615,7 +618,7 @@ def goodmorning():
 def goodnight():
     global last_night_call
     global night_time
-    last_night_call = datetime.datetime.now()
+    last_night_call = datetime.datetime.now() + datetime.timedelta(minutes=30)
     night_time = True
     bot.send_sticker(chat_id=group, sticker=noAdsStickerID)
     bot.send_sticker(chat_id=group, sticker=goodNightStickerID)
