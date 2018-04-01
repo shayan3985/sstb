@@ -588,6 +588,7 @@ def cmd_restart(bot  # type: telegram.Bot
                ):
     if not is_master(update.message.from_user.id):
         return
+    bot.send_message(chat_id=update.message.chat_id,text="system rebooted wait for 30 sec")
     import os
     os.system('reboot')
 
