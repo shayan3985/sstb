@@ -68,9 +68,9 @@ last_night_call = None
 def is_master(id):
     if id == shayanTID:
         return True
-
-    if id == nasrinTID:
-        return True
+    if not DEBUG:
+        if id == nasrinTID:
+            return True
     return False
 
 
@@ -88,7 +88,12 @@ def is_admin(update):
 def is_governor(id):
     if is_master(id):
         return True
-
+    try:
+        u = Governor.objects.get(t_id=id)
+        if u is not None:
+            return True
+    except:
+        pass
     return False
 
 
@@ -139,7 +144,6 @@ def group_text(bot  # type: telegram.Bot
             message.forward(chat_id=log_channel)
             update.message.delete()
             return
-
     if update.message.audio is not None and not is_admin(update):
         message.forward(chat_id=log_channel)
         update.message.delete()
@@ -150,7 +154,6 @@ def group_text(bot  # type: telegram.Bot
         return
 
     new_members = update.message.new_chat_members  # type: list
-    print(len(new_members))
     if len(new_members) is not 0:
         manage_new_members_update(bot, update, new_members)
     else:
@@ -255,6 +258,12 @@ def group_text_permission_control(bot  # type: telegram.Bot
 
 
 def manage_new_members_update(bot, update, new_members):
+    for m in new_members:  # type: telegram.User
+        if m.is_bot:
+            bot.kick_chat_member(chat_id=update.message.chat_id, user_id=m.id)
+            bot.kick_chat_member(chat_id=update.message.chat_id, user_id=update.message.from_user.id)
+            new_members.remove(m)
+            return
     u = update.message.from_user  # type: telegram.User
     response = ''
     member = None
@@ -584,11 +593,11 @@ def cmd_debug(bot  # type: telegram.Bot
 
 
 def cmd_restart(bot  # type: telegram.Bot
-               , update  # type: telegram.Update
-               ):
+                , update  # type: telegram.Update
+                ):
     if not is_master(update.message.from_user.id):
         return
-    bot.send_message(chat_id=update.message.chat_id,text="system rebooted wait for 30 sec")
+    bot.send_message(chat_id=update.message.chat_id, text="system rebooted wait for 30 sec")
     import os
     os.system('reboot')
 
