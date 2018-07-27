@@ -37,9 +37,29 @@ private_party_owner = None
 private_party_owner_name = None
 
 first_message_id_file_name = "firstMessage"
+message_limit_file_name = "messagelimit"
+group_error_file_name = "grouperror"
+
+message_limit = 2
+group_error = 1
+
 if not os.path.exists("./" + first_message_id_file_name):
     with open("./" + first_message_id_file_name, 'w') as f:
         f.write("0")
+
+if not os.path.exists("./" + message_limit_file_name):
+    with open("./" + message_limit_file_name, 'w') as f:
+        f.write(str(message_limit))
+else:
+    with open("./" + message_limit_file_name, 'r+') as f:
+        message_limit = int(f.readline().__str__())
+
+if not os.path.exists("./" + group_error_file_name):
+    with open("./" + group_error_file_name, 'w') as f:
+        f.write(str(group_error))
+else:
+    with open("./" + group_error_file_name, 'r+') as f:
+        group_error = int(f.readline().__str__())
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -228,9 +248,18 @@ def group_text_permission_control(bot  # type: telegram.Bot
                                                    messageHelper.json["22"], reply_to_message_id=m.message_id,
                          parse_mode='HTML')
         update.message.delete()
+        if not member.first_error:
+            bot.send_message(chat_id=update.message.chat_id,
+                             text=messageHelper.json["32"].format(
+                                 messageHelper.json["3"].format(update.message.from_user.id
+                                                                ,
+                                                                update.message.from_user.first_name))
+                             , parse_mode='HTML')
+            member.first_error = True
+            member.save()
         return
     post = Post.objects.filter(from_user_id=user_id).filter(datetime__gt=timezone.now() - timezone.timedelta(hours=3))
-    if len(post) > 1:
+    if len(post) > message_limit - 1:
         m = update.message.forward(chat_id=log_channel)
         bot.send_message(chat_id=log_channel, text=messageHelper.json["3"].format(update.message.from_user.id,
                                                                                   update.message.from_user.first_name) + "/n" +
@@ -245,7 +274,7 @@ def group_text_permission_control(bot  # type: telegram.Bot
         hours=3)
     post = Post.objects.filter(from_user_id=user_id).filter(datetime__range=(today_min, today_max))
 
-    if len(post) > 5:
+    if len(post) > message_limit * 3:
         m = update.message.forward(chat_id=log_channel)
         bot.send_message(chat_id=log_channel, text=messageHelper.json["24"], reply_to_message_id=m.message_id)
         update.message.delete()
@@ -309,6 +338,13 @@ def manage_new_members_update(bot, update, new_members):
             channel_log(messageHelper.json["21"].format(messageHelper.json["3"]
                                                         .format(str(member.t_id),
                                                                 base64.b64decode(member.first_name).decode())))
+            if group_error == 1:
+                bot.send_message(chat_id=update.message.chat_id,
+                                 text=messageHelper.json["33"].format(
+                                     messageHelper.json["3"].format(update.message.from_user.id
+                                                                    ,
+                                                                    update.message.from_user.first_name))
+                                 , parse_mode='HTML')
     member.save()
 
 
@@ -536,6 +572,36 @@ def channel_log(text):
     bot.send_message(chat_id=log_channel, text=str(text), parse_mode='HTML')
 
 
+def cmd_change_timespan(bot  # type: telegram.Bot
+                        , update  # type: telegram.Update
+                        , args):
+    if not is_governor(update.message.from_user.id):
+        return
+    global message_limit
+    global message_limit_file_name
+    if len(args) != 1:
+        bot.send_message(chat_id=update.message.chat_id,
+                         text=messageHelper.json["2"].format("timespan"))
+        return
+    cmd = args[0]
+    if cmd == 'show':
+        bot.send_message(chat_id=update.message.chat_id,
+                         text=str(message_limit))
+        return
+
+    try:
+        x = int(cmd)
+    except:
+        bot.send_message(chat_id=update.message.chat_id,
+                         text=messageHelper.json["2"].format("timespan"))
+        return
+    message_limit = x
+    with open("./" + message_limit_file_name, 'w') as f:
+        f.write(str(message_limit))
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=str(message_limit))
+
+
 def cmd_inquiry(bot  # type: telegram.Bot
                 , update  # type: telegram.Update
                 , args):
@@ -592,6 +658,27 @@ def cmd_debug(bot  # type: telegram.Bot
     bot.send_message(chat_id=update.message.chat_id, text=log)
 
 
+def cmd_error_toggle(bot  # type: telegram.Bot
+                     , update  # type: telegram.Update
+                     ):
+    if not is_governor(update.message.from_user.id):
+        return
+    global group_error
+    global group_error_file_name
+
+    if group_error == 0:
+        group_error = 1
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="error active")
+    else:
+        group_error = 0
+        bot.send_message(chat_id=update.message.chat_id,
+                         text="error deactive")
+
+    with open("./" + group_error_file_name, 'w') as f:
+        f.write(str(group_error))
+
+
 def cmd_restart(bot  # type: telegram.Bot
                 , update  # type: telegram.Update
                 ):
@@ -623,6 +710,10 @@ updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("debug", cmd_debug)
 updater.dispatcher.add_handler(hdl)
 hdl = CommandHandler("restart", cmd_restart)
+updater.dispatcher.add_handler(hdl)
+hdl = CommandHandler("timespan", cmd_change_timespan, pass_args=True)
+updater.dispatcher.add_handler(hdl)
+hdl = CommandHandler("errortoggle", cmd_error_toggle)
 updater.dispatcher.add_handler(hdl)
 
 import schedule

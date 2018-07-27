@@ -16,6 +16,7 @@ class Member(models.Model):
     chat_id = models.BigIntegerField(blank=True, null=True, default=0)
     party_count = models.IntegerField(default=0)
     permitted_datetime = models.DateTimeField(null=True)
+    first_error = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.t_id)
